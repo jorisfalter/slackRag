@@ -10,12 +10,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# TEST MODE: Set to True to only fetch a few messages for testing
+TEST_MODE = True
+MAX_TEST_MESSAGES = 30  # Only fetch this many messages in test mode
+
 # Debug: Check if environment variables are loaded
 print(f"PINECONE_API_KEY loaded: {os.getenv('PINECONE_API_KEY') is not None}")
 print(f"PINECONE_INDEX loaded: {os.getenv('PINECONE_INDEX') is not None}")
 print(f"SLACK_BOT_TOKEN loaded: {os.getenv('SLACK_BOT_TOKEN') is not None}")
 print(f"SLACK_CHANNEL_ID loaded: {os.getenv('SLACK_CHANNEL_ID') is not None}")
 print(f"OPENAI_API_KEY loaded: {os.getenv('OPENAI_API_KEY') is not None}")
+
+if TEST_MODE:
+    print(f"\n🧪 TEST MODE: Only fetching {MAX_TEST_MESSAGES} messages for testing")
 
 client = WebClient(token=os.getenv("SLACK_BOT_TOKEN"))
 
@@ -80,7 +87,11 @@ def fetch_channel_messages(channel_id):
     call_count = 0
     
     print(f"Starting to fetch messages from channel {channel_id}")
-    print("Note: Using 30-second delays to avoid rate limits (2 calls per minute)")
+    if TEST_MODE:
+        print(f"🧪 TEST MODE: Will stop after {MAX_TEST_MESSAGES} messages")
+        print("Note: Using 2-second delays in test mode for faster testing")
+    else:
+        print("Note: Using 30-second delays to avoid rate limits (2 calls per minute)")
     
     while True:
         call_count += 1
@@ -92,6 +103,11 @@ def fetch_channel_messages(channel_id):
             print(f"✅ Successfully fetched {len(response['messages'])} messages")
             messages.extend(response['messages'])
             
+            # Check if we've reached our test limit
+            if TEST_MODE and len(messages) >= MAX_TEST_MESSAGES:
+                print(f"🧪 TEST MODE: Reached {len(messages)} messages, stopping here")
+                break
+            
             if not response.get('has_more'):
                 print("No more messages to fetch")
                 break
@@ -99,9 +115,13 @@ def fetch_channel_messages(channel_id):
             cursor = response['response_metadata']['next_cursor']
             print(f"More messages available, cursor: {cursor[:20]}...")
             
-            # Rate limiting: wait 30 seconds between API calls (2 per minute max)
-            print("Waiting 30 seconds before next call...")
-            time.sleep(30)
+            # Rate limiting: shorter delay in test mode
+            if TEST_MODE:
+                print("Waiting 2 seconds before next call (test mode)...")
+                time.sleep(2)
+            else:
+                print("Waiting 30 seconds before next call...")
+                time.sleep(30)
             
         except SlackApiError as e:
             print(f"❌ Slack API Error: {e.response['error']}")
