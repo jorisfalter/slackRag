@@ -34,7 +34,7 @@ def format_response(results, query):
             result = result[:500] + "..."
         response += f"**Result {i}:**\n{result}\n\n"
     
-    response += "_💡 These are excerpts from your Slack conversations. Ask me more specific questions for better results!_"
+    response += "💡 _These are excerpts from your Slack conversations. Ask me more specific questions for better results!_"
     return response
 
 def handle_user_query(user_query, channel, user_id):
@@ -75,8 +75,22 @@ def slack_events():
         if "event" in data:
             event = data["event"]
             
-            # Ignore bot's own messages
-            if event.get("user") == os.getenv("SLACK_BOT_USER_ID"):
+            # Multiple checks to ignore bot's own messages and avoid loops
+            bot_user_id = os.getenv("SLACK_BOT_USER_ID")
+            
+            # Ignore if message is from the bot itself
+            if event.get("user") == bot_user_id:
+                print(f"Ignoring message from bot user: {bot_user_id}")
+                return "", 200
+            
+            # Ignore if message has bot_id (another way messages from bots are identified)
+            if event.get("bot_id"):
+                print(f"Ignoring message from bot_id: {event.get('bot_id')}")
+                return "", 200
+            
+            # Ignore if message subtype indicates it's from a bot
+            if event.get("subtype") in ["bot_message", "message_changed", "message_deleted"]:
+                print(f"Ignoring message with subtype: {event.get('subtype')}")
                 return "", 200
             
             # Handle app mentions
@@ -85,6 +99,12 @@ def slack_events():
                 channel = event.get("channel")
                 user_id = event.get("user")
                 
+                # Additional check: ignore if the message looks like our own response format
+                if "Here's what I found about" in user_query or "**Result" in user_query:
+                    print("Ignoring message that looks like bot's own response")
+                    return "", 200
+                
+                print(f"Processing app mention from user {user_id}: {user_query}")
                 response = handle_user_query(user_query, channel, user_id)
                 
                 client.chat_postMessage(
@@ -99,6 +119,12 @@ def slack_events():
                 channel = event.get("channel")
                 user_id = event.get("user")
                 
+                # Additional check: ignore if the message looks like our own response format
+                if "Here's what I found about" in user_query or "**Result" in user_query:
+                    print("Ignoring DM that looks like bot's own response")
+                    return "", 200
+                
+                print(f"Processing DM from user {user_id}: {user_query}")
                 response = handle_user_query(user_query, channel, user_id)
                 
                 client.chat_postMessage(

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # TEST MODE: Set to True to only fetch a few messages for testing
-TEST_MODE = True
+TEST_MODE = False
 MAX_TEST_MESSAGES = 30  # Only fetch this many messages in test mode
 
 # Debug: Check if environment variables are loaded
