@@ -18,9 +18,17 @@ def get_pinecone_client():
     index = pc.Index(pinecone_index_name)
     return index
 
-def upsert_to_pinecone(id, embedding, text):
+def upsert_to_pinecone(id, embedding, text, metadata=None):
     index = get_pinecone_client()
-    index.upsert(vectors=[{"id": id, "values": embedding, "metadata": {"text": text}}])
+    
+    # Base metadata
+    vector_metadata = {"text": text}
+    
+    # Add additional metadata if provided
+    if metadata:
+        vector_metadata.update(metadata)
+    
+    index.upsert(vectors=[{"id": id, "values": embedding, "metadata": vector_metadata}])
 
 def query_pinecone(embedding, top_k=3):
     index = get_pinecone_client()

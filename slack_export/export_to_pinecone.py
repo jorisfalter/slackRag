@@ -61,14 +61,14 @@ def test_channel_access(channel_id):
         print(f"✅ Channel access successful!")
         print(f"   Channel name: {response['channel']['name']}")
         print(f"   Channel ID: {response['channel']['id']}")
-        return True
+        return response['channel']
     except SlackApiError as e:
         print(f"❌ Channel access failed: {e.response['error']}")
         if e.response['error'] == 'channel_not_found':
             print("   The channel ID might be wrong, or the bot isn't in this channel.")
         elif e.response['error'] == 'not_in_channel':
             print("   The bot needs to be added to this channel first.")
-        return False
+        return None
 
 def test_simple_api_call():
     """Test a simple API call to see if rate limiting happens immediately"""
@@ -220,7 +220,8 @@ def main():
         return
     
     print(f"\n=== Testing Channel Access ===")
-    if not test_channel_access(channel_id):
+    channel_info = test_channel_access(channel_id)
+    if not channel_info:
         return
     
     print(f"\n=== Testing Bot Channel Membership ===")
@@ -239,11 +240,25 @@ def main():
     user_map = fetch_user_map()
     print(f"Fetched {len(user_map)} users.")
     chunks = group_messages(messages, user_map, window_size=5, overlap=2)
+    
     for idx, (chunk_id, chunk_text) in enumerate(chunks, 1):
         print(f"\n--- Conversation Chunk {idx} ---\n{chunk_text}\n-----------------------------\n")
         embedding = get_embedding(chunk_text)
-        upsert_to_pinecone(chunk_id, embedding, chunk_text)
-    print(f"Uploaded {len(chunks)} chunks to Pinecone.")
+        
+        # Create metadata for this chunk
+        metadata = {
+            "channel_name": channel_info.get("name", "unknown"),
+            "channel_id": channel_id,
+            "chunk_index": idx,
+            "total_chunks": len(chunks),
+            "message_count": len(chunk_text.split('\n')),
+            "timestamp": chunk_id  # The timestamp of the first message in the chunk
+        }
+        
+        upsert_to_pinecone(chunk_id, embedding, chunk_text, metadata)
+    
+    print(f"Uploaded {len(chunks)} chunks to Pinecone with metadata.")
+    print(f"Each chunk includes: channel_name, channel_id, chunk_index, message_count, timestamp")
 
 if __name__ == "__main__":
     main() 
