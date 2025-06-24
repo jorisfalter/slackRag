@@ -63,26 +63,67 @@ def test_channel_access(channel_id):
             print("   The bot needs to be added to this channel first.")
         return False
 
+def test_simple_api_call():
+    """Test a simple API call to see if rate limiting happens immediately"""
+    try:
+        print("Testing simple API call (auth.test)...")
+        response = client.auth_test()
+        print("✅ Simple API call successful")
+        return True
+    except SlackApiError as e:
+        print(f"❌ Simple API call failed: {e.response['error']}")
+        return False
+
 def fetch_channel_messages(channel_id):
     messages = []
     cursor = None
+    call_count = 0
+    
+    print(f"Starting to fetch messages from channel {channel_id}")
+    print("Note: Using 30-second delays to avoid rate limits (2 calls per minute)")
+    
     while True:
+        call_count += 1
+        print(f"API call #{call_count} - Fetching messages...")
+        
         try:
-            response = client.conversations_history(channel=channel_id, cursor=cursor, limit=200)
+            # Start with a smaller limit to test
+            response = client.conversations_history(channel=channel_id, cursor=cursor, limit=10)
+            print(f"✅ Successfully fetched {len(response['messages'])} messages")
             messages.extend(response['messages'])
+            
             if not response.get('has_more'):
+                print("No more messages to fetch")
                 break
+                
             cursor = response['response_metadata']['next_cursor']
-            # Rate limiting: wait 1 second between API calls
-            time.sleep(1)
+            print(f"More messages available, cursor: {cursor[:20]}...")
+            
+            # Rate limiting: wait 30 seconds between API calls (2 per minute max)
+            print("Waiting 30 seconds before next call...")
+            time.sleep(30)
+            
         except SlackApiError as e:
-            print(f"Error fetching messages: {e.response['error']}")
+            print(f"❌ Slack API Error: {e.response['error']}")
+            print(f"Full error response: {e.response}")
+            
             if e.response['error'] == 'ratelimited':
-                print("Rate limited. Waiting 60 seconds...")
-                time.sleep(60)
+                # Check if there are rate limit headers
+                if hasattr(e.response, 'headers'):
+                    retry_after = e.response.headers.get('Retry-After')
+                    if retry_after:
+                        print(f"Retry-After header: {retry_after} seconds")
+                        time.sleep(int(retry_after) + 5)  # Add 5 seconds buffer
+                    else:
+                        print("No Retry-After header, waiting 120 seconds...")
+                        time.sleep(120)
+                else:
+                    print("No headers available, waiting 120 seconds...")
+                    time.sleep(120)
             else:
                 print(f"Non-rate-limit error: {e}")
                 break
+                
     # Sort messages by timestamp (oldest first)
     messages.sort(key=lambda x: float(x['ts']))
     return messages
@@ -90,24 +131,44 @@ def fetch_channel_messages(channel_id):
 def fetch_user_map():
     user_map = {}
     cursor = None
+    call_count = 0
+    
+    print("Starting to fetch user information...")
+    print("Note: Using 30-second delays to avoid rate limits (2 calls per minute)")
+    
     while True:
+        call_count += 1
+        print(f"User API call #{call_count}...")
+        
         try:
             response = client.users_list(cursor=cursor)
+            print(f"✅ Successfully fetched {len(response['members'])} users")
+            
             for user in response['members']:
                 user_map[user['id']] = user['profile'].get('display_name') or user['profile'].get('real_name') or user['name']
+            
             if not response.get('response_metadata', {}).get('next_cursor'):
+                print("No more users to fetch")
                 break
+                
             cursor = response['response_metadata']['next_cursor']
-            # Rate limiting: wait 1 second between API calls
-            time.sleep(1)
+            print("More users available...")
+            
+            # Rate limiting: wait 30 seconds between API calls (2 per minute max)
+            print("Waiting 30 seconds before next user call...")
+            time.sleep(30)
+            
         except SlackApiError as e:
-            print(f"Error fetching users: {e.response['error']}")
+            print(f"❌ User API Error: {e.response['error']}")
+            print(f"Full error response: {e.response}")
+            
             if e.response['error'] == 'ratelimited':
-                print("Rate limited. Waiting 60 seconds...")
-                time.sleep(60)
+                print("Rate limited on users. Waiting 120 seconds...")
+                time.sleep(120)
             else:
                 print(f"Non-rate-limit error: {e}")
                 break
+                
     return user_map
 
 def group_messages(messages, user_map, window_size=5, overlap=2):
@@ -144,6 +205,10 @@ def main():
     
     print(f"\n=== Testing Bot Channel Membership ===")
     if not test_bot_in_channel(channel_id, bot_user_id):
+        return
+    
+    print(f"\n=== Testing Simple API Call ===")
+    if not test_simple_api_call():
         return
     
     print("\n=== Fetching Data ===")
