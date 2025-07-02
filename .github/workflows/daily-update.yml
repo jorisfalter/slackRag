@@ -33,12 +33,12 @@ jobs:
         run: |
           python slack_export/incremental_update.py
 
-          - name: Upload logs (if needed)
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: update-logs
-        path: |
-          last_update.json
-          *.log
-        retention-days: 7
+      - name: Upload logs (if needed)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-logs
+          path: |
+            last_update.json
+            *.log
+          retention-days: 7
