@@ -33,4 +33,20 @@ def upsert_to_pinecone(id, embedding, text, metadata=None):
 def query_pinecone(embedding, top_k=3):
     index = get_pinecone_client()
     result = index.query(vector=embedding, top_k=top_k, include_metadata=True)
-    return [match['metadata']['text'] for match in result['matches']] 
+    return [match['metadata']['text'] for match in result['matches']]
+
+def query_pinecone_with_metadata(embedding, top_k=3):
+    """Query Pinecone and return both text and metadata for each match"""
+    index = get_pinecone_client()
+    result = index.query(vector=embedding, top_k=top_k, include_metadata=True)
+    
+    results = []
+    for match in result['matches']:
+        results.append({
+            'text': match['metadata']['text'],
+            'channel_name': match['metadata'].get('channel_name', 'unknown'),
+            'channel_id': match['metadata'].get('channel_id', 'unknown'),
+            'timestamp': match['metadata'].get('timestamp', 'unknown'),
+            'score': match['score']
+        })
+    return results 

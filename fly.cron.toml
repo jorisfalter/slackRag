@@ -1,0 +1,27 @@
+app = "ragslack-madli-cron"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "Dockerfile.cron"
+
+[env]
+  PORT = "3000"
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 3000
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["http", "tls"]
+
+[processes]
+  cron = "cron -f"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb" 
