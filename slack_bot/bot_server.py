@@ -15,6 +15,30 @@ app = Flask(__name__)
 client = WebClient(token=os.getenv("SLACK_BOT_TOKEN"))
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# User access control - Add your user IDs here
+AUTHORIZED_USERS = {
+    os.getenv("ADMIN_USER_ID"),        # Your user ID
+    os.getenv("CEO_USER_ID"),          # CEO's user ID
+}
+
+# Remove None values if env vars aren't set
+AUTHORIZED_USERS = {user_id for user_id in AUTHORIZED_USERS if user_id}
+
+def is_user_authorized(user_id):
+    """Check if user is authorized to use the bot"""
+    if not AUTHORIZED_USERS:
+        # If no authorized users configured, allow all (fallback)
+        print("⚠️  No authorized users configured - allowing all users")
+        return True
+    
+    is_authorized = user_id in AUTHORIZED_USERS
+    print(f"🔒 User {user_id} authorization check: {'✅ ALLOWED' if is_authorized else '❌ DENIED'}")
+    return is_authorized
+
+def get_unauthorized_message():
+    """Get message to show unauthorized users"""
+    return "🔒 Sorry, this bot is restricted to authorized users only. Please contact your administrator if you need access."
+
 # Simple cache to prevent duplicate responses
 import time
 recent_queries = {}  # {user_id: {query_hash: timestamp}}
@@ -333,6 +357,16 @@ def slack_events():
                     print("Ignoring message that looks like bot's own response")
                     return "", 200
                 
+                # 🔒 AUTHORIZATION CHECK
+                if not is_user_authorized(user_id):
+                    print(f"❌ Unauthorized user {user_id} attempted to use bot")
+                    client.chat_postMessage(
+                        channel=channel,
+                        text=get_unauthorized_message(),
+                        thread_ts=event.get("ts")
+                    )
+                    return "", 200
+                
                 print(f"Processing app mention from user {user_id}: {user_query}")
                 response = handle_user_query(user_query, channel, user_id)
                 
@@ -353,6 +387,15 @@ def slack_events():
                 # Additional check: ignore if the message looks like our own response format
                 if "Here's what I found about" in user_query or "**Result" in user_query:
                     print("Ignoring DM that looks like bot's own response")
+                    return "", 200
+                
+                # 🔒 AUTHORIZATION CHECK
+                if not is_user_authorized(user_id):
+                    print(f"❌ Unauthorized user {user_id} attempted to DM bot")
+                    client.chat_postMessage(
+                        channel=channel,
+                        text=get_unauthorized_message()
+                    )
                     return "", 200
                 
                 print(f"Processing DM from user {user_id}: {user_query}")
