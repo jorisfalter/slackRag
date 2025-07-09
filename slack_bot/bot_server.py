@@ -17,7 +17,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # User access control - Add your user IDs here
 AUTHORIZED_USERS = {
-    os.getenv("ADMIN_USER_ID"),        # Your user ID
+    # os.getenv("ADMIN_USER_ID"),        # Your user ID
     os.getenv("CEO_USER_ID"),          # CEO's user ID
 }
 
