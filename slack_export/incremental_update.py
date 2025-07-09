@@ -361,6 +361,19 @@ def main():
     save_processed_messages(processed_ids)
     save_last_update_time(current_time)  # For backward compatibility
     
+    # Commit tracking data to GitHub (if running in GitHub Actions)
+    if os.getenv('GITHUB_ACTIONS'):
+        print(f"\n💾 Saving tracking data to GitHub repository...")
+        try:
+            sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+            from utils.github_storage import setup_github_token, commit_tracking_files_to_github
+            
+            setup_github_token()
+            commit_tracking_files_to_github()
+        except Exception as e:
+            print(f"⚠️  Could not commit tracking data to GitHub: {e}")
+            print("   Tracking data saved locally but may be lost between runs")
+    
     print(f"\n🎉 Enhanced Incremental Update Complete!")
     print(f"   Total new chunks added: {total_new_chunks}")
     print(f"   New message IDs processed: {len(all_new_processed_ids)}")

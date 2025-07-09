@@ -9,10 +9,14 @@ on:
 jobs:
   update-database:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Allow committing tracking data back to repository
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -30,15 +34,18 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
           PINECONE_INDEX: ${{ secrets.PINECONE_INDEX }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python slack_export/incremental_update.py
 
-      - name: Upload logs (if needed)
+      - name: Upload tracking data and logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: update-logs
+          name: update-logs-and-tracking
           path: |
             last_update.json
+            channel_tracking.json
+            processed_messages.json
             *.log
-          retention-days: 7
+          retention-days: 30

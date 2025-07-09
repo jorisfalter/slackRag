@@ -118,4 +118,10 @@ logs/
 *.tmp
 *.temp
 temp/
-tmp/ 
+tmp/
+
+# Tracking files (committed by GitHub Actions only)
+# These files are managed by automated workflows
+# last_update.json
+# channel_tracking.json
+# processed_messages.json 
