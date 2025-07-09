@@ -1,37 +1,37 @@
 {
   "general": {
-    "last_update": 1751543511.548229,
-    "last_update_readable": "2025-07-03 13:51:51",
-    "last_updated_at": "2025-07-07 12:40:55"
+    "last_update": 1751980603.915499,
+    "last_update_readable": "2025-07-08 13:16:43",
+    "last_updated_at": "2025-07-09 08:17:09"
   },
   "madlicreative-admin": {
     "last_update": 1751234400.0,
-    "last_update_readable": "2025-06-30 00:00:00",
-    "last_updated_at": "2025-07-07 12:40:55"
+    "last_update_readable": "2025-06-29 22:00:00",
+    "last_updated_at": "2025-07-09 08:17:09"
   },
   "bookkeeping--madlicreative": {
-    "last_update": 1751393284.210269,
-    "last_update_readable": "2025-07-01 20:08:04",
-    "last_updated_at": "2025-07-07 12:40:55"
+    "last_update": 1751395110.769709,
+    "last_update_readable": "2025-07-01 18:38:30",
+    "last_updated_at": "2025-07-09 08:17:09"
   },
   "creative": {
-    "last_update": 1751234400.0,
-    "last_update_readable": "2025-06-30 00:00:00",
-    "last_updated_at": "2025-07-07 12:40:55"
+    "last_update": 1751979939.987839,
+    "last_update_readable": "2025-07-08 13:05:39",
+    "last_updated_at": "2025-07-09 08:17:09"
   },
   "madlicreative-marketing": {
-    "last_update": 1751234400.0,
-    "last_update_readable": "2025-06-30 00:00:00",
-    "last_updated_at": "2025-07-07 12:40:55"
+    "last_update": 1751979939.948269,
+    "last_update_readable": "2025-07-08 13:05:39",
+    "last_updated_at": "2025-07-09 08:17:09"
   },
   "products-n-services": {
-    "last_update": 1751234400.0,
-    "last_update_readable": "2025-06-30 00:00:00",
-    "last_updated_at": "2025-07-07 12:40:55"
+    "last_update": 1751981244.569379,
+    "last_update_readable": "2025-07-08 13:27:24",
+    "last_updated_at": "2025-07-09 08:17:09"
   },
   "workflow": {
-    "last_update": 1751234400.0,
-    "last_update_readable": "2025-06-30 00:00:00",
-    "last_updated_at": "2025-07-07 12:40:55"
+    "last_update": 1751295343.256879,
+    "last_update_readable": "2025-06-30 14:55:43",
+    "last_updated_at": "2025-07-09 08:17:09"
   }
 }
