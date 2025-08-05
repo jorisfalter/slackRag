@@ -1,37 +1,37 @@
 {
   "general": {
-    "last_update": 1753968465.249369,
-    "last_update_readable": "2025-07-31 13:27:45",
-    "last_updated_at": "2025-08-04 09:31:13"
+    "last_update": 1754358773.036719,
+    "last_update_readable": "2025-08-05 01:52:53",
+    "last_updated_at": "2025-08-05 09:26:45"
   },
   "madlicreative-admin": {
     "last_update": 1751234400.0,
     "last_update_readable": "2025-06-29 22:00:00",
-    "last_updated_at": "2025-08-04 09:31:13"
+    "last_updated_at": "2025-08-05 09:26:45"
   },
   "bookkeeping--madlicreative": {
     "last_update": 1754069290.537499,
     "last_update_readable": "2025-08-01 17:28:10",
-    "last_updated_at": "2025-08-04 09:31:13"
+    "last_updated_at": "2025-08-05 09:26:45"
   },
   "creative": {
     "last_update": 1752169404.462609,
     "last_update_readable": "2025-07-10 17:43:24",
-    "last_updated_at": "2025-08-04 09:31:13"
+    "last_updated_at": "2025-08-05 09:26:45"
   },
   "madlicreative-marketing": {
     "last_update": 1752513885.352989,
     "last_update_readable": "2025-07-14 17:24:45",
-    "last_updated_at": "2025-08-04 09:31:13"
+    "last_updated_at": "2025-08-05 09:26:45"
   },
   "products-n-services": {
     "last_update": 1754052845.277379,
     "last_update_readable": "2025-08-01 12:54:05",
-    "last_updated_at": "2025-08-04 09:31:13"
+    "last_updated_at": "2025-08-05 09:26:45"
   },
   "workflow": {
     "last_update": 1751311056.282919,
     "last_update_readable": "2025-06-30 19:17:36",
-    "last_updated_at": "2025-08-04 09:31:13"
+    "last_updated_at": "2025-08-05 09:26:45"
   }
 }
